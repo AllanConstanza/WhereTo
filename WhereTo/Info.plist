@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-<dict/>
+<dict>
+	<key>FoursquareAPIKey</key>
+	<string>I3FONBATTJG5QWXXX3MQ4IDICLKINCHH0Q4MZCTPRGFJAWUF3</string>
+	<key>TicketmasterAPIKey</key>
+	<string>cjt68Gi8JAG5gFUXgsCIOheMiqvXEGbv</string>
+</dict>
 </plist>

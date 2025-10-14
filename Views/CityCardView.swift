@@ -5,6 +5,7 @@
 //  Created by Allan Constanza on 9/12/25.
 //
 import SwiftUI
+import UIKit
 
 struct CityCardView: View {
     let city: City

@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		15649EA72E9D7F3800ECD18D /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 15649EA62E9D7F3800ECD18D /* FirebaseAuth */; };
+		15649EA92E9D7F3800ECD18D /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 15649EA82E9D7F3800ECD18D /* FirebaseCore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		15649E192E73501200ECD18D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -24,13 +29,13 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		15649E182E73501200ECD18D /* WhereToTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = WhereToTests.xctest; path = "/Users/allanconstanza/Desktop/Capstone/WhereTo/build/Debug-iphoneos/WhereTo.app/PlugIns/WhereToTests.xctest"; sourceTree = "<absolute>"; };
-		15649E222E73501300ECD18D /* WhereToUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = WhereToUITests.xctest; path = "/Users/allanconstanza/Desktop/Capstone/WhereTo/build/Debug-iphoneos/WhereToUITests-Runner.app/PlugIns/WhereToUITests.xctest"; sourceTree = "<absolute>"; };
 		15649E492E78935C00ECD18D /* WhereTo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WhereTo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		15649E6A2E99D6CC00ECD18D /* WhereToTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WhereToTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		15649E6B2E99D6CC00ECD18D /* WhereToUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WhereToUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		15649E5C2E88CBA300ECD18D /* Exceptions for "WhereTo" folder in "WhereTo" target */ = {
+		15649E712E9CDECA00ECD18D /* Exceptions for "WhereTo" folder in "WhereTo" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -43,7 +48,7 @@
 		15649E0D2E73501000ECD18D /* WhereTo */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				15649E5C2E88CBA300ECD18D /* Exceptions for "WhereTo" folder in "WhereTo" target */,
+				15649E712E9CDECA00ECD18D /* Exceptions for "WhereTo" folder in "WhereTo" target */,
 			);
 			path = WhereTo;
 			sourceTree = "<group>";
@@ -80,6 +85,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				15649EA92E9D7F3800ECD18D /* FirebaseCore in Frameworks */,
+				15649EA72E9D7F3800ECD18D /* FirebaseAuth in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -110,6 +117,8 @@
 				15649E1B2E73501200ECD18D /* WhereToTests */,
 				15649E252E73501300ECD18D /* WhereToUITests */,
 				15649E492E78935C00ECD18D /* WhereTo.app */,
+				15649E6A2E99D6CC00ECD18D /* WhereToTests.xctest */,
+				15649E6B2E99D6CC00ECD18D /* WhereToUITests.xctest */,
 			);
 			sourceTree = "<group>";
 		};
@@ -136,6 +145,8 @@
 			);
 			name = WhereTo;
 			packageProductDependencies = (
+				15649EA62E9D7F3800ECD18D /* FirebaseAuth */,
+				15649EA82E9D7F3800ECD18D /* FirebaseCore */,
 			);
 			productName = WhereTo;
 			productReference = 15649E492E78935C00ECD18D /* WhereTo.app */;
@@ -161,7 +172,7 @@
 			packageProductDependencies = (
 			);
 			productName = WhereToTests;
-			productReference = 15649E182E73501200ECD18D /* WhereToTests.xctest */;
+			productReference = 15649E6A2E99D6CC00ECD18D /* WhereToTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		15649E212E73501300ECD18D /* WhereToUITests */ = {
@@ -184,7 +195,7 @@
 			packageProductDependencies = (
 			);
 			productName = WhereToUITests;
-			productReference = 15649E222E73501300ECD18D /* WhereToUITests.xctest */;
+			productReference = 15649E6B2E99D6CC00ECD18D /* WhereToUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -219,6 +230,9 @@
 			);
 			mainGroup = 15649E022E73501000ECD18D;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				15649EA52E9D7F3800ECD18D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 15649E022E73501000ECD18D;
 			projectDirPath = "";
@@ -345,6 +359,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
@@ -402,6 +417,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
@@ -422,7 +438,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = WhereTo/Info.plist;
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We use your location to sort cities by distance";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We use your location to sort cities by distance.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -451,7 +467,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = WhereTo/Info.plist;
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We use your location to sort cities by distance";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We use your location to sort cities by distance.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -578,6 +594,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		15649EA52E9D7F3800ECD18D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.4.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		15649EA62E9D7F3800ECD18D /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 15649EA52E9D7F3800ECD18D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		15649EA82E9D7F3800ECD18D /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 15649EA52E9D7F3800ECD18D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 15649E032E73501000ECD18D /* Project object */;
 }
