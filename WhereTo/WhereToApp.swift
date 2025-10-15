@@ -11,13 +11,13 @@ struct WhereToApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     @StateObject private var auth = AuthViewModel()
-    @StateObject private var todo = ToDoStore()
+    @StateObject private var store = ToDoStore()
 
     var body: some Scene {
         WindowGroup {
             RootView()
                 .environmentObject(auth)
-                .environmentObject(todo)
+                .environmentObject(store)
         }
     }
 }
