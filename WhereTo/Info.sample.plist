@@ -3,8 +3,8 @@
 <plist version="1.0">
 <dict>
 	<key>FoursquareAPIKey</key>
-	<string>I3FONBATTJG5QWXXX3MQ4IDICLKINCHH0Q4MZCTPRGFJAWUF3</string>
+	<string>YOUR_KEY_HERE</string>
 	<key>TicketmasterAPIKey</key>
-	<string>cjt68Gi8JAG5gFUXgsCIOheMiqvXEGbv</string>
+	<string>YOUR_TICKETMASTER_KEY_HERE</string>
 </dict>
 </plist>

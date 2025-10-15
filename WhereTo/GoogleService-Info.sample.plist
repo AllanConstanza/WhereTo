@@ -3,28 +3,28 @@
 <plist version="1.0">
 <dict>
 	<key>API_KEY</key>
-	<string>AIzaSyBVxTNDGJgD7YhLNooh9EVXDroW9HXfu_k</string>
+	<string>YOUR_KEY_HERE</string>
 	<key>GCM_SENDER_ID</key>
-	<string>1019235487001</string>
+	<string>0000000</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
 	<string>com.AllanConstanza.WhereTo</string>
 	<key>PROJECT_ID</key>
-	<string>whereto-b6a57</string>
+	<string>your-proiect-id</string>
 	<key>STORAGE_BUCKET</key>
-	<string>whereto-b6a57.firebasestorage.app</string>
+	<string>your-project-id.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
-	<false></false>
+	<false/>
 	<key>IS_ANALYTICS_ENABLED</key>
-	<false></false>
+	<false/>
 	<key>IS_APPINVITE_ENABLED</key>
-	<true></true>
+	<true/>
 	<key>IS_GCM_ENABLED</key>
-	<true></true>
+	<true/>
 	<key>IS_SIGNIN_ENABLED</key>
-	<true></true>
+	<true/>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:1019235487001:ios:e2749008cec403827bc988</string>
+	<string>1:XXXXXXX:ios:YYYYYYY</string>
 </dict>
 </plist>
