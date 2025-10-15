@@ -11,3 +11,5 @@ xcuserdata/
 WhereTo/GoogleService-Info.plist
 .DS_Store
 *.swp
+WhereTo/Info.plist
+WhereTo/GoogleService-Info.plist
