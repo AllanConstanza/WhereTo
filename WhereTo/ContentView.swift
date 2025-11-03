@@ -45,7 +45,7 @@ struct ContentView: View {
                     NavigationLink {
                         CityDetailView(city: city)
                     } label: {
-                        CityCardView(city: city, distance: distance)
+                        CityCardView(city: city, distance: distance) // CityCardView shows miles
                     }
                     .listRowSeparator(.hidden)
                     .listRowInsets(EdgeInsets())
@@ -55,6 +55,7 @@ struct ContentView: View {
             }
             .navigationTitle("WhereTo")
             .toolbar {
+                // Open To-Do list (leading)
                 ToolbarItem(placement: .topBarLeading) {
                     NavigationLink {
                         ToDoListView()
@@ -63,6 +64,8 @@ struct ContentView: View {
                     }
                     .accessibilityLabel("Open To-Do")
                 }
+
+                // Sort by proximity (trailing)
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { Task { await sortByProximity() } } label: {
                         Image(systemName: "location.fill")
@@ -82,6 +85,7 @@ struct ContentView: View {
                message: { Text("Enable location or set a simulator location to sort by distance.") })
     }
 
+    //Sort by proximity
     @MainActor
     private func sortByProximity() async {
         if loc.location == nil {
@@ -105,7 +109,9 @@ struct ContentView: View {
 
     @MainActor
     private func geocodeAllIfNeededInPlace() async {
+        // Warm-up helps avoid "first call returns nil"
         try? await Task.sleep(nanoseconds: 150_000_000)
+
         for i in displayCities.indices where displayCities[i].coord == nil {
             let name = displayCities[i].name
             let queries = queriesForCity(name)
@@ -116,7 +122,7 @@ struct ContentView: View {
                     found = fix; break
                 }
                 try? await Task.sleep(nanoseconds: 180_000_000)
-                if j == 0, found == nil {
+                if j == 0, found == nil { // retry the most specific once
                     if let fix = try? await geocoder.coordinates(for: q) {
                         found = fix; break
                     }
@@ -159,6 +165,7 @@ struct ContentView: View {
 
 #Preview { ContentView() }
 
+//custom search bar
 private struct CustomSearchBar: View {
     @Binding var text: String
     var placeholder: String = "Search"
@@ -174,8 +181,7 @@ private struct CustomSearchBar: View {
             if !text.isEmpty {
                 Button { text = "" } label: {
                     Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
-                }
-                .accessibilityLabel("Clear search")
+                }.accessibilityLabel("Clear search")
             }
         }
         .padding(12)

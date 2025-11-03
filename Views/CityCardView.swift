@@ -9,7 +9,7 @@ import UIKit
 
 struct CityCardView: View {
     let city: City
-    var distance: Double? = nil   
+    var distance: Double? = nil
 
     var body: some View {
         HStack {
@@ -36,16 +36,12 @@ struct CityCardView: View {
                 Text(city.name)
                     .font(.title3).fontWeight(.semibold)
 
-              
-
-        
                 if let d = distance {
                     let miles = d / 1609.344
                     Text(String(format: "%.1f mi away", miles))
                         .font(.footnote)
                         .foregroundColor(.secondary)
                 }
-
             }
             Spacer()
         }

@@ -39,7 +39,9 @@
 		15649E712E9CDECA00ECD18D /* Exceptions for "WhereTo" folder in "WhereTo" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				"GoogleService-Info.sample.plist",
 				Info.plist,
+				Info.sample.plist,
 			);
 			target = 15649E0A2E73501000ECD18D /* WhereTo */;
 		};
