@@ -45,12 +45,9 @@ The app integrates APIs, geolocation, dynamic images, user authentication, and p
 
 ## Screenshots
 
-### Home Screen  
-<img src="https://github.com/user-attachments/assets/5a0a4481-6c6d-4140-8917-6b5fb8c0aaad" alt="WhereTo Home Screen" width="300" />
-
-### City Detail  
-<img src="https://github.com/user-attachments/assets/0322e613-5f48-43a0-b7d3-7d6abed16a2d" alt="WhereTo City Detail Screen" width="300" />
-
+| Home | Details |
+|------|---------|
+| <img src="https://github.com/user-attachments/assets/5a0a4481-6c6d-4140-8917-6b5fb8c0aaad" width="240" /> | <img src="https://github.com/user-attachments/assets/0322e613-5f48-43a0-b7d3-7d6abed16a2d" width="240" /> |
 
 ---
 
