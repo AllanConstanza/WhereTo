@@ -1,1 +1,62 @@
-# WhereTo
+# WhereTo — City Explorer App
+
+WhereTo is an iOS travel discovery app built with **SwiftUI**, designed to help users explore major U.S. cities, view local events, and see landmarks.  
+The app integrates APIs, geolocation, dynamic images, user authentication, and personalization features.
+
+---
+
+## Features
+
+### **Authentication**
+- Firebase Email/Password Login
+- Profile screen showing user email
+- Profile picture upload (Firestore + Storage)
+- Delete Account functionality
+- Dark/Light mode toggle (saved per user)
+
+### **City Discovery**
+- Browse curated list of major U.S. cities
+- Auto-fetch Wikipedia images for each city
+- Geocoding to retrieve real coordinates
+- Sorting cities by proximity to user
+- City detail screen includes:
+  - Wikipedia landmark search
+  - Live events (Ticketmaster-ready integration)
+  - Coordinates & map support (if used)
+
+### **To-Do List**
+- City-specific bucket list items
+- Stored per logged-in user
+
+---
+
+## Tech Stack
+
+- **SwiftUI**
+- **Firebase Authentication**
+- **Firestore**
+- **Firebase Storage**
+- **Wikipedia REST API**
+- **CoreLocation**
+- **Async/Await Networking**
+- **MVVM structure**
+
+---
+
+## Screenshots
+(Add your own screenshots here later)
+
+---
+
+## Installation
+- Clone the repository
+- Open WhereTo.Xcodeproj and add your GoggleService-info.plist to the project 
+- Add your API keys inside AppConfig.swift
+- run the app on IOS simulator 
+
+## Notes
+- Profile picture upload requires Firebase Storage enabled 
+- Wikipedia images depend on city naming; fallback behavior is included
+- Ticketmaster Events require API keys to be activated
+
+
