@@ -6,78 +6,75 @@
 //
 
 import Foundation
+import CoreLocation
 
 final class WikipediaImageService {
-    private struct Summary: Decodable {
-        struct Media: Decodable { let source: String }
-        let type: String?
-        let originalimage: Media?
-        let thumbnail: Media?
-    }
 
-    private let preferredTitles: [String: String] = [
-        "new york": "New York City",
-        "los angeles": "Los Angeles",
-        "san francisco": "San Francisco"
-    ]
+    // Main fast request
+    func fastImage(for title: String) async -> URL? {
 
-    func fetchImageURL(title raw: String) async -> URL? {
-        let title = normalize(raw)
-        guard let url = URL(string: "https://en.wikipedia.org/api/rest_v1/page/summary/\(title)") else { return nil }
+        let normalized = title
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: " ", with: "_")
+            .addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)
+            ?? title
+
+        let urlString = "https://en.wikipedia.org/api/rest_v1/page/summary/\(normalized)"
+        guard let url = URL(string: urlString) else { return nil }
+
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
-            let summary = try JSONDecoder().decode(Summary.self, from: data)
-            if summary.type == "disambiguation" { return nil }
-            if let s = summary.thumbnail?.source, let u = URL(string: s) { return u }
-            if let s = summary.originalimage?.source, let u = URL(string: s) { return u }
-        } catch {}
-        return nil
-    }
+            let obj = try JSONSerialization.jsonObject(with: data) as? [String: Any]
 
-    func fetchCityImageURL(cityName: String) async -> URL? {
-        let key = cityName.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        let preferred = preferredTitles[key] ?? cityName
-        if let u = await fetchImageURL(title: preferred) { return u }
-        return await fetchImageURL(title: cityName)
-    }
-
-    func fetchImageURL(wikipediaTag: String) async -> URL? {
-        let parts = wikipediaTag.split(separator: ":", maxSplits: 1).map(String.init)
-        guard parts.count == 2 else { return nil }
-        let lang = parts[0]
-        let title = parts[1]
-        guard let url = URL(string: "https://\(lang).wikipedia.org/api/rest_v1/page/summary/\(title)") else { return nil }
-        do {
-            let (data, _) = try await URLSession.shared.data(from: url)
-            let summary = try JSONDecoder().decode(Summary.self, from: data)
-            if summary.type == "disambiguation" { return nil }
-            if let s = summary.thumbnail?.source, let u = URL(string: s) { return u }
-            if let s = summary.originalimage?.source, let u = URL(string: s) { return u }
-        } catch {}
-        return nil
-    }
-
-    func fetchImageURL(wikidataID: String) async -> URL? {
-        guard let url = URL(string: "https://www.wikidata.org/wiki/Special:EntityData/\(wikidataID).json") else { return nil }
-        do {
-            let (data, _) = try await URLSession.shared.data(from: url)
-            if let obj = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-               let entities = obj["entities"] as? [String: Any],
-               let ent = entities[wikidataID] as? [String: Any],
-               let claims = ent["claims"] as? [String: Any],
-               let p18 = claims["P18"] as? [[String: Any]],
-               let mainsnak = p18.first?["mainsnak"] as? [String: Any],
-               let datav = mainsnak["datavalue"] as? [String: Any],
-               let filename = datav["value"] as? String {
-                let enc = filename.replacingOccurrences(of: " ", with: "_")
-                return URL(string: "https://commons.wikimedia.org/wiki/Special:FilePath/\(enc)?width=480")
+            // Wikipedia sometimes returns "type": "disambiguation"
+            if let type = obj?["type"] as? String,
+               type == "disambiguation" {
+                return nil   // fallback handler will catch this
             }
-        } catch {}
+
+            // Try thumbnail
+            if let src = (obj?["thumbnail"] as? [String: Any])?["source"] as? String {
+                return URL(string: src)
+            }
+
+            // Try original image
+            if let src = (obj?["originalimage"] as? [String: Any])?["source"] as? String {
+                return URL(string: src)
+            }
+
+        } catch {
+            return nil
+        }
+
         return nil
     }
 
-    private func normalize(_ title: String) -> String {
-        let t = title.trimmingCharacters(in: .whitespacesAndNewlines)
-        return t.replacingOccurrences(of: " ", with: "_").addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? t
+    // Fallback for cases like "Portland"
+    func fetchCityImageURL(cityName: String) async -> URL? {
+
+        // 1 — Try "City, State"
+        if cityName == "Portland",
+           let url = await fastImage(for: "Portland,_Oregon") {
+            return url
+        }
+
+        // 2 — Try the raw name
+        if let url = await fastImage(for: cityName) {
+            return url
+        }
+
+        // 3 — Fallback for common ambiguous names
+        if let url = await fastImage(for: "\(cityName)_city") {
+            return url
+        }
+
+        // 4 — Last fallback: "...,_USA"
+        if let url = await fastImage(for: "\(cityName),_USA") {
+            return url
+        }
+
+        return nil
     }
 }
+
+

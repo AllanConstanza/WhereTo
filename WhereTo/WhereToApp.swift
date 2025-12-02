@@ -3,23 +3,26 @@
 //  WhereTo
 //
 //  Created by Allan Constanza 
-//
 import SwiftUI
+import Firebase
 
 @main
 struct WhereToApp: App {
-    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @StateObject var auth = AuthViewModel()
+    @StateObject var themeManager = ThemeManager()
+    @StateObject var store = ToDoStore()
 
-    @StateObject private var auth = AuthViewModel()
-    @StateObject private var store = ToDoStore()
+    init() {
+        FirebaseApp.configure()
+    }
 
     var body: some Scene {
         WindowGroup {
-            RootView()
+            RootView()                     
                 .environmentObject(auth)
+                .environmentObject(themeManager)
                 .environmentObject(store)
+                .preferredColorScheme(themeManager.colorScheme)
         }
     }
 }
-
-

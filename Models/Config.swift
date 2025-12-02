@@ -21,4 +21,12 @@ enum AppConfig {
     static var hasTicketmasterKey: Bool {
         !ticketmasterKey.isEmpty
     }
+     
+    
+ 
+    static let foursquareKey   = "0KXVDI5RGGSEDVLLRVS5UZN12BERSGNYTK5XUOCECBLVIZV2"
+    
+
+    
+    
 }

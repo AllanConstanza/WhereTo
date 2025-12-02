@@ -11,6 +11,8 @@ struct ContentView: View {
     private let imageService = WikipediaImageService()
     private let geocoder = GeocodingService()
 
+    @State private var showProfile = false
+
     @State private var displayCities: [City] = [
         City(name: "Los Angeles"),
         City(name: "San Francisco"),
@@ -20,8 +22,18 @@ struct ContentView: View {
         City(name: "Detroit"),
         City(name: "Sacramento"),
         City(name: "Boston"),
-        City(name: "Oakland")
+        City(name: "Oakland"),
+
+        City(name: "Seattle"),
+        City(name: "San Diego"),
+        City(name: "Portland"),
+        City(name: "Houston"),
+        City(name: "Dallas"),
+        City(name: "Philadelphia"),
+        City(name: "Atlanta"),
+        City(name: "Washington D.C.")
     ]
+
 
     @State private var searchText = ""
     @State private var showNoLocationAlert = false
@@ -45,7 +57,7 @@ struct ContentView: View {
                     NavigationLink {
                         CityDetailView(city: city)
                     } label: {
-                        CityCardView(city: city, distance: distance) // CityCardView shows miles
+                        CityCardView(city: city, distance: distance)
                     }
                     .listRowSeparator(.hidden)
                     .listRowInsets(EdgeInsets())
@@ -55,7 +67,8 @@ struct ContentView: View {
             }
             .navigationTitle("WhereTo")
             .toolbar {
-                // Open To-Do list (leading)
+
+                // To-Do list (leading)
                 ToolbarItem(placement: .topBarLeading) {
                     NavigationLink {
                         ToDoListView()
@@ -72,20 +85,39 @@ struct ContentView: View {
                     }
                     .accessibilityLabel("Sort by nearest")
                 }
+
+                // Profile button (trailing)
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showProfile = true
+                    } label: {
+                        Image(systemName: "person.circle")
+                            .imageScale(.large)
+                    }
+                    .accessibilityLabel("Open Profile")
+                }
+            }
+
+            // Correctly placed navigation destination
+            .navigationDestination(isPresented: $showProfile) {
+                ProfileView()
             }
         }
         .task {
             await geocodeAllIfNeededInPlace()
             await prefetchImagesIfNeededInPlace()
         }
-        .onAppear { loc.start(); loc.refresh() }
+        .onAppear {
+            loc.start()
+            loc.refresh()
+        }
         .alert("Location unavailable",
                isPresented: $showNoLocationAlert,
                actions: { Button("OK", role: .cancel) {} },
                message: { Text("Enable location or set a simulator location to sort by distance.") })
     }
 
-    //Sort by proximity
+    // Sort by proximity
     @MainActor
     private func sortByProximity() async {
         if loc.location == nil {
@@ -109,8 +141,7 @@ struct ContentView: View {
 
     @MainActor
     private func geocodeAllIfNeededInPlace() async {
-        // Warm-up helps avoid "first call returns nil"
-        try? await Task.sleep(nanoseconds: 150_000_000)
+        try? await Task.sleep(nanoseconds: 150_000_000) // warm-up
 
         for i in displayCities.indices where displayCities[i].coord == nil {
             let name = displayCities[i].name
@@ -119,12 +150,15 @@ struct ContentView: View {
             var found: CLLocation? = nil
             for (j, q) in queries.enumerated() {
                 if let fix = try? await geocoder.coordinates(for: q) {
-                    found = fix; break
+                    found = fix
+                    break
                 }
                 try? await Task.sleep(nanoseconds: 180_000_000)
-                if j == 0, found == nil { // retry the most specific once
+
+                if j == 0, found == nil {
                     if let fix = try? await geocoder.coordinates(for: q) {
-                        found = fix; break
+                        found = fix
+                        break
                     }
                 }
             }
@@ -165,7 +199,7 @@ struct ContentView: View {
 
 #Preview { ContentView() }
 
-//custom search bar
+// Custom search bar
 private struct CustomSearchBar: View {
     @Binding var text: String
     var placeholder: String = "Search"
@@ -181,7 +215,8 @@ private struct CustomSearchBar: View {
             if !text.isEmpty {
                 Button { text = "" } label: {
                     Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
-                }.accessibilityLabel("Clear search")
+                }
+                .accessibilityLabel("Clear search")
             }
         }
         .padding(12)

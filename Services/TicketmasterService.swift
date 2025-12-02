@@ -15,6 +15,8 @@ struct TMEvent: Identifiable {
     let venue: String?
     let url: URL?
     let imageURL: URL?
+    let category: String?
+    
 }
 
 enum TicketmasterError: LocalizedError {
@@ -106,7 +108,9 @@ final class TicketmasterService {
             }
 
             return events.map { ev in
-                TMEvent(
+                let category = ev.classifications?.first?.segment?.name    
+
+                return TMEvent(
                     id: ev.id ?? UUID().uuidString,
                     name: ev.name ?? "Event",
                     date: parseDate(ev.dates?.start?.dateTime),
@@ -114,7 +118,8 @@ final class TicketmasterService {
                     url: ev.url.flatMap(URL.init(string:)),
                     imageURL: ev.images?
                         .sorted { ($0.width ?? 0) > ($1.width ?? 0) }
-                        .first?.url.flatMap(URL.init(string:))
+                        .first?.url.flatMap(URL.init(string:)),
+                    category: category     // ← ADD
                 )
             }
         } catch {
@@ -147,6 +152,15 @@ final class TicketmasterService {
             let images: [Image]?
             let dates: Dates?
             let _embedded: VenuesEmb?
+            let classifications: [Classification]?
+        }
+
+
+        struct Classification: Decodable {
+            let segment: Segment?
+            struct Segment: Decodable {
+                let name: String?
+            }
         }
         struct Image: Decodable { let url: String?; let width: Int? }
         struct Dates: Decodable { let start: Start? }

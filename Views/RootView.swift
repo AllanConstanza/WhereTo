@@ -13,27 +13,25 @@ struct RootView: View {
 
     var body: some View {
         Group {
-            if auth.user != nil {
-                NavigationStack {
-                    ContentView()
-                        .toolbar {
-                            ToolbarItem(placement: .topBarTrailing) {
-                                Button("Sign out") {
-                                    auth.signOut()
-                                    store.connect(userID: nil) 
-                                }
-                            }
-                        }
-                }
-            } else {
+
+            if !auth.isAuthLoaded {
+                ProgressView("Loading…")
+            }
+            else if auth.user == nil {
                 NavigationStack { SignInView() }
             }
+            else {
+                NavigationStack {
+                    ContentView()
+                }
+            }
         }
-        .onAppear {
+        .task {
             store.connect(userID: auth.user?.uid)
         }
-        .onChange(of: auth.user?.uid) { _, newUID in
-            store.connect(userID: newUID)
+        .onChange(of: auth.user?.uid) { _, new in
+            store.connect(userID: new)
         }
     }
 }
+

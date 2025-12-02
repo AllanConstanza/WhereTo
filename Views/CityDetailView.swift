@@ -3,7 +3,7 @@
 //  WhereTo
 //
 //  Created by Allan Constanza on 9/27/25.
-//
+
 
 import SwiftUI
 import CoreLocation
@@ -16,12 +16,17 @@ struct CityDetailView: View {
     @EnvironmentObject private var todo: ToDoStore
     @EnvironmentObject private var auth: AuthViewModel
 
+    @State private var showProfile = false
+
+    // Landmarks via Wikipedia
+    private let wiki = WikiLandmarksService()
     @State private var cityCoord: CLLocationCoordinate2D?
-    @State private var landmarks: [Landmark] = []
+    @State private var landmarks: [WikiLandmark] = []
     @State private var isLoadingLandmarks = false
     @State private var landmarkError: String?
 
-    @State private var events: [LiveEvent] = []
+    // Live events via Ticketmaster
+    @State private var events: [LocalLiveEvent] = []
     @State private var isLoadingEvents = false
     @State private var eventsError: String?
 
@@ -32,18 +37,33 @@ struct CityDetailView: View {
     @State private var popularListener: ListenerRegistration?
 
     @State private var showAddedToast = false
+    @State private var selectedFilter: EventFilter = .all
+
+    enum EventFilter: String, CaseIterable {
+        case all = "All"
+        case music = "Music"
+        case sports = "Sports"
+        case arts = "Arts & Theatre"
+    }
 
     private let geocoder = GeocodingService()
-    private let wiki     = WikipediaImageService()
-    private let osm      = LandmarksService()
-    private let tm       = TicketmasterService(key: AppConfig.ticketmasterKey)
+    private let tm = TicketmasterService(key: AppConfig.ticketmasterKey)
     private let popularSvc = PopularEventsService()
+
+    fileprivate var filteredEvents: [LocalLiveEvent] {
+        switch selectedFilter {
+        case .all:    return events
+        case .music:  return events.filter { $0.category == "Music" }
+        case .sports: return events.filter { $0.category == "Sports" }
+        case .arts:   return events.filter { $0.category == "Arts & Theatre" }
+        }
+    }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
 
-                // City header image + title
+                // City Header Image
                 AsyncImage(url: city.imageURL) { phase in
                     switch phase {
                     case .success(let img): img.resizable().scaledToFill()
@@ -60,6 +80,7 @@ struct CityDetailView: View {
                         .padding()
                 }
 
+                
                 // Landmarks
                 HStack {
                     Text("Top Landmarks").font(.title2).bold()
@@ -86,7 +107,7 @@ struct CityDetailView: View {
                     }
                 }
 
-                // Popular Events (cityKey-based)
+                // Popular Events
                 HStack {
                     Text("Popular Events").font(.title2).bold()
                     if isLoadingPopular { ProgressView().padding(.leading, 6) }
@@ -119,12 +140,20 @@ struct CityDetailView: View {
                 }
                 .padding(.horizontal)
 
+                Picker("Filter", selection: $selectedFilter) {
+                    ForEach(EventFilter.allCases, id: \.self) { filter in
+                        Text(filter.rawValue)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .padding(.horizontal)
+
                 if let err = eventsError {
                     Text(err).foregroundColor(.red).padding(.horizontal)
                 }
 
                 VStack(spacing: 12) {
-                    ForEach(events) { ev in
+                    ForEach(filteredEvents) { ev in
                         EventRow(event: ev) {
                             addToTodoAndUpvoteFromLive(ev)
                         }
@@ -132,18 +161,37 @@ struct CityDetailView: View {
                     }
                 }
 
-                Text("Data © OpenStreetMap contributors, Wikipedia, Ticketmaster")
-                    .font(.footnote).foregroundColor(.secondary)
+                Text("Data © Wikipedia, Ticketmaster")
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
                     .padding([.horizontal, .bottom])
             }
         }
-        .task { await loadAll() }
+
+        // SIMPLE SEQUENTIAL LOAD (NO TASK GROUP)
+        .task {
+            await loadAll()
+        }
+
         .onAppear {
             attachPopularListener()
             Task { await popularSvc.purgeExpired(in: city.name) }
         }
         .onDisappear { detachPopularListener() }
+
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button { showProfile = true } label: {
+                    Image(systemName: "person.circle")
+                        .imageScale(.large)
+                }
+            }
+        }
+        .navigationDestination(isPresented: $showProfile) {
+            ProfileView()
+        }
+
         .overlay(alignment: .top) {
             if showAddedToast {
                 AddedToastView()
@@ -155,101 +203,106 @@ struct CityDetailView: View {
         .animation(.spring(response: 0.45, dampingFraction: 0.85), value: showAddedToast)
     }
 
+    
+    // MASTER LOADER
     private func loadAll() async {
         do {
             let loc: CLLocation
+
             if let c = city.coord {
                 cityCoord = c.coordinate
                 loc = c
-            } else if let found = try await geocoder.coordinates(for: city.name) {
+            } else {
+                let found = try await geocoder.coordinates(for: city.name)
                 cityCoord = found.coordinate
                 loc = found
-            } else {
-                throw NSError(domain: "WhereTo", code: 1,
-                              userInfo: [NSLocalizedDescriptionKey: "Could not locate city."])
             }
 
+            // Correct function signatures — both expect CLLocationCoordinate2D
             await loadLandmarks(near: loc.coordinate)
             await loadEvents(near: loc.coordinate)
 
         } catch {
-            landmarkError = error.localizedDescription
-            eventsError = "Waiting for location…"
+            print("Error loading city details:", error)
         }
     }
 
+    // LOAD WIKIPEDIA LANDMARKS
     private func loadLandmarks(near coord: CLLocationCoordinate2D) async {
-        isLoadingLandmarks = true
-        landmarkError = nil
-        defer { isLoadingLandmarks = false }
+        await MainActor.run {
+            isLoadingLandmarks = true
+            landmarkError = nil
+        }
 
         do {
-            var items = try await osm.fetchLandmarks(near: coord, radiusMeters: 12_000, limit: 20)
+            let items = try await wiki.fetchLandmarks(near: coord)
 
-            await withTaskGroup(of: Void.self) { group in
-                for i in items.indices {
-                    group.addTask {
-                        if let url = await wiki.fetchImageURL(title: items[i].name) {
-                            Task { @MainActor in items[i].imageURL = url }
-                        } else if let tag = items[i].wikipedia,
-                                  let url = await wiki.fetchImageURL(wikipediaTag: tag) {
-                            Task { @MainActor in items[i].imageURL = url }
-                        } else if let qid = items[i].wikidata,
-                                  let url = await wiki.fetchImageURL(wikidataID: qid) {
-                            Task { @MainActor in items[i].imageURL = url }
-                        }
-                    }
-                }
+            await MainActor.run {
+                self.landmarks = items
+                self.isLoadingLandmarks = false
             }
-
-            func score(_ lm: Landmark) -> Int {
-                let c = (lm.category ?? "").lowercased()
-                if c.contains("museum") || c.contains("landmark") || c.contains("monument") { return 0 }
-                if c.contains("historic") || c.contains("attraction") { return 1 }
-                if c.contains("park") || c.contains("viewpoint") { return 2 }
-                return 3
-            }
-            items.sort { a, b in
-                let sa = score(a), sb = score(b)
-                return sa == sb ? (a.name < b.name) : (sa < sb)
-            }
-
-            self.landmarks = items
-
         } catch {
-            self.landmarkError = error.localizedDescription
+            await MainActor.run {
+                self.landmarkError = error.localizedDescription
+                self.isLoadingLandmarks = false
+            }
         }
     }
 
+    // LOAD LIVE EVENTS (Ticketmaster)
     private func loadEvents(near coord: CLLocationCoordinate2D) async {
         guard AppConfig.hasTicketmasterKey else {
-            self.events = dummyEvents()
+            await MainActor.run {
+                self.events = dummyEvents()
+            }
             return
         }
-        isLoadingEvents = true
-        eventsError = nil
-        defer { isLoadingEvents = false }
+
+        await MainActor.run {
+            isLoadingEvents = true
+            eventsError = nil
+        }
 
         do {
             let start = Date(timeIntervalSince1970: floor(Date().timeIntervalSince1970))
-            let tmEvents = try await tm.events(near: coord, radiusMiles: 25, size: 20, startDate: start)
-            self.events = tmEvents.map { tm in
-                LiveEvent(title: tm.name,
-                          venue: tm.venue ?? "TBA",
-                          date: tm.date ?? Date().addingTimeInterval(86400),
-                          url: tm.url,
-                          imageURL: tm.imageURL,
-                          sourceId: tm.id)
+            let tmEvents = try await tm.events(
+                near: coord,
+                radiusMiles: 25,
+                size: 20,
+                startDate: start
+            )
+
+            let mapped = tmEvents.map { tm in
+                LocalLiveEvent(
+                    title: tm.name,
+                    venue: tm.venue ?? "TBA",
+                    date: tm.date ?? Date().addingTimeInterval(86400),
+                    url: tm.url,
+                    imageURL: tm.imageURL,
+                    category: tm.category,
+                    sourceId: tm.id
+                )
             }
+
+            await MainActor.run {
+                self.events = mapped
+                self.isLoadingEvents = false
+            }
+
         } catch {
-            self.eventsError = error.localizedDescription
-            self.events = dummyEvents()
+            await MainActor.run {
+                self.eventsError = error.localizedDescription
+                self.events = dummyEvents()
+                self.isLoadingEvents = false
+            }
         }
     }
 
+    // POPULAR EVENTS & TO-DO
     private func attachPopularListener() {
         isLoadingPopular = true
         popularError = nil
+
         popularListener = popularSvc.listenTopEvents(
             city: city.name,
             limit: 5,
@@ -278,11 +331,12 @@ struct CityDetailView: View {
         Task { try? await popularSvc.upvote(event: ev, uid: uid) }
     }
 
-    private func addToTodoAndUpvoteFromLive(_ ev: LiveEvent) {
+    private func addToTodoAndUpvoteFromLive(_ ev: LocalLiveEvent) {
         todo.add(title: ev.title, city: city.name, date: ev.date)
         notifyAdded()
 
         guard let uid = auth.user?.uid else { return }
+
         let eventId = ev.sourceId ?? stableId(for: ev)
         let pop = PopularEvent(
             id: eventId,
@@ -293,10 +347,11 @@ struct CityDetailView: View {
             tmId: ev.sourceId,
             popularity: 0
         )
+
         Task { try? await popularSvc.upvote(event: pop, uid: uid) }
     }
 
-    private func stableId(for ev: LiveEvent) -> String {
+    private func stableId(for ev: LocalLiveEvent) -> String {
         "\(city.name.lowercased())_\(ev.title.lowercased())_\(Int(ev.date.timeIntervalSince1970))"
             .replacingOccurrences(of: " ", with: "_")
     }
@@ -307,28 +362,46 @@ struct CityDetailView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) { showAddedToast = false }
     }
 
-    private func dummyEvents() -> [LiveEvent] {
+    private func dummyEvents() -> [LocalLiveEvent] {
         let now = Date()
         return [
-            LiveEvent(title: "Sunset Rooftop Sessions", venue: "Skyline Lounge", date: now.addingTimeInterval(60*60*24*1)),
-            LiveEvent(title: "Indie Night Market",      venue: "Harbor Walk",    date: now.addingTimeInterval(60*60*24*2)),
-            LiveEvent(title: "Open-Air Jazz",           venue: "Central Park",   date: now.addingTimeInterval(60*60*24*3)),
-            LiveEvent(title: "Food Truck Fridays",      venue: "Arts District",  date: now.addingTimeInterval(60*60*24*4))
+            LocalLiveEvent(
+                title: "Sunset Rooftop Sessions",
+                venue: "Skyline Lounge",
+                date: now.addingTimeInterval(60*60*24*1)
+            ),
+            LocalLiveEvent(
+                title: "Indie Night Market",
+                venue: "Harbor Walk",
+                date: now.addingTimeInterval(60*60*24*2)
+            ),
+            LocalLiveEvent(
+                title: "Open-Air Jazz",
+                venue: "Central Park",
+                date: now.addingTimeInterval(60*60*24*3)
+            ),
+            LocalLiveEvent(
+                title: "Food Truck Fridays",
+                venue: "Arts District",
+                date: now.addingTimeInterval(60*60*24*4)
+            )
         ]
     }
 }
 
-
+// LandmarkCard for WikiLandmark
 private struct LandmarkCard: View {
-    let landmark: Landmark
+    let landmark: WikiLandmark
     let onAdd: () -> Void
 
     var body: some View {
         VStack(spacing: 8) {
             AsyncImage(url: landmark.imageURL) { phase in
                 switch phase {
-                case .success(let img): img.resizable().scaledToFill()
-                default: Color.gray.opacity(0.2)
+                case .success(let img):
+                    img.resizable().scaledToFill()
+                default:
+                    Color.gray.opacity(0.15)
                 }
             }
             .frame(width: 100, height: 100)
@@ -336,15 +409,14 @@ private struct LandmarkCard: View {
 
             Text(landmark.name)
                 .font(.footnote)
-                .multilineTextAlignment(.center)
                 .lineLimit(2)
                 .frame(width: 100)
+                .multilineTextAlignment(.center)
 
             Button(action: onAdd) {
                 Image(systemName: "plus.circle")
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Add \(landmark.name) to To-Do")
         }
     }
 }
@@ -374,7 +446,8 @@ private struct PopularEventCard: View {
 
             Button(action: onAdd) {
                 Label("Add", systemImage: "plus.circle")
-            }.labelStyle(.iconOnly)
+            }
+            .labelStyle(.iconOnly)
         }
         .padding(10)
         .background(Color(.systemBackground))
@@ -403,7 +476,7 @@ private struct PopularEmptyCard: View {
 }
 
 private struct EventRow: View {
-    let event: LiveEvent
+    let event: LocalLiveEvent
     let onAdd: () -> Void
 
     var body: some View {
@@ -428,17 +501,22 @@ private struct EventRow: View {
                 Text(event.title).font(.headline)
                 HStack(spacing: 8) {
                     Label(event.venue, systemImage: "mappin.and.ellipse")
-                    Label(event.date.formatted(date: .abbreviated, time: .shortened),
-                          systemImage: "calendar")
+                    Label(
+                        event.date.formatted(date: .abbreviated, time: .shortened),
+                        systemImage: "calendar"
+                    )
                 }
                 .font(.footnote)
                 .foregroundStyle(.secondary)
 
                 if let link = event.url {
-                    Link("Open in Ticketmaster", destination: link).font(.footnote)
+                    Link("Open in Ticketmaster", destination: link)
+                        .font(.footnote)
                 }
             }
+
             Spacer()
+
             Button(action: onAdd) {
                 Image(systemName: "plus.circle").imageScale(.large)
             }
@@ -466,13 +544,13 @@ private struct AddedToastView: View {
     }
 }
 
-private struct LiveEvent: Identifiable, Equatable {
+fileprivate struct LocalLiveEvent: Identifiable, Equatable {
     let id = UUID()
     let title: String
     let venue: String
     let date: Date
     var url: URL? = nil
     var imageURL: URL? = nil
-    var sourceId: String? = nil 
+    var category: String? = nil
+    var sourceId: String? = nil
 }
-
