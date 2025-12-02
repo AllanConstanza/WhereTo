@@ -56,9 +56,9 @@ The app integrates APIs, geolocation, dynamic images, user authentication, and p
 
 ## Installation
 - Clone the repository
-- Open WhereTo.Xcodeproj and add your GoggleService-info.plist to the project 
+- Open WhereTo.Xcodeproj and add your GoogleService-info.plist to the project 
 - Add your API keys inside AppConfig.swift
-- run the app on IOS simulator 
+- run the app on ios simulator 
 
 ## Notes
 - Profile picture upload requires Firebase Storage enabled 
