@@ -22,7 +22,6 @@ The app integrates APIs, geolocation, dynamic images, user authentication, and p
 - City detail screen includes:
   - Wikipedia landmark search
   - Live events (Ticketmaster-ready integration)
-  - Coordinates & map support (if used)
 
 ### **To-Do List**
 - City-specific bucket list items
