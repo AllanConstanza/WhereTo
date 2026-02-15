@@ -36,6 +36,7 @@ The app integrates APIs, geolocation, dynamic images, user authentication, and p
 - **Firestore**
 - **Firebase Storage**
 - **Wikipedia REST API**
+- **Ticketmaster API**
 - **CoreLocation**
 - **Async/Await Networking**
 - **MVVM structure**
