@@ -44,9 +44,10 @@ The app integrates APIs, geolocation, dynamic images, user authentication, and p
 
 ## Screenshots
 
-| Home | Details | To-Do List | Recently Deleted
-|------|---------|------|---------|
-| <img src="https://github.com/user-attachments/assets/5a0a4481-6c6d-4140-8917-6b5fb8c0aaad" width="240" /> | <img src="https://github.com/user-attachments/assets/0322e613-5f48-43a0-b7d3-7d6abed16a2d" width="240" /> | <img width="327" height="657" alt="To Do List" src="https://github.com/user-attachments/assets/25534ce5-db7b-4f90-a5d4-ce262fedf167" width="240" /> | <img width="326" height="664" alt="Recently Deleted" src="https://github.com/user-attachments/assets/b4775450-6330-4625-a94a-3036bdb4e013" width="240" />
+| Home | Details | Live Events | To-Do List | Recently Deleted
+|------|---------|---------|---------|---------|
+
+| <img src="https://github.com/user-attachments/assets/5a0a4481-6c6d-4140-8917-6b5fb8c0aaad" width="240" /> | <img src="https://github.com/user-attachments/assets/0322e613-5f48-43a0-b7d3-7d6abed16a2d" width="240" /> | <img width="329" height="709" alt="Live Events" src="https://github.com/user-attachments/assets/6c568ca8-7415-49f1-8060-e988382f11a0" width="240" /> | <img width="327" height="657" alt="To Do List" src="https://github.com/user-attachments/assets/25534ce5-db7b-4f90-a5d4-ce262fedf167" width="240" /> | <img width="326" height="664" alt="Recently Deleted" src="https://github.com/user-attachments/assets/b4775450-6330-4625-a94a-3036bdb4e013" width="240" />
 
 
 
